@@ -1,0 +1,29 @@
+# Environment & Credentials
+.env
+.env.local
+config/credentials.php
+config/database.php
+
+# Logs (contain sensitive data)
+logs/
+sms_log.txt
+smtp_debug.txt
+debug.log
+
+# Local development
+.DS_Store
+.vscode/
+node_modules/
+vendor/
+
+# Session files
+*.sess
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# IDE
+.idea/
+*.iml
