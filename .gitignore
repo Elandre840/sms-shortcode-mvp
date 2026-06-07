@@ -1,0 +1,5 @@
+config.php
+logs/*.txt
+*.log
+.vscode/
+*.zip
