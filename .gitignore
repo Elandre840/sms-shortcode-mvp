@@ -1,5 +1,33 @@
-config.php
-logs/*.txt
-*.log
+# Environment & Credentials
+.env
+.env.local
+config/credentials.php
+config/database.php
+
+# Logs (contain sensitive data)
+logs/
+sms_log.txt
+smtp_debug.txt
+debug.log
+
+# Local development
+.DS_Store
 .vscode/
-*.zip
+node_modules/
+vendor/
+
+# Session files
+*.sess
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+
+# IDE
+.idea/
+*.iml
+
+# Demo video build artifacts
+video/node_modules/
+video/output/tmp/

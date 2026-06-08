@@ -1,0 +1,62 @@
+[
+  {
+    "image": "../assets/demo/01_login.png",
+    "voice": "Introducing the SMS Management System — a helpdesk platform for routing SMS and WhatsApp requests to technicians.",
+    "caption": "SMS Management System"
+  },
+  {
+    "image": "../assets/demo/02_register.png",
+    "voice": "Technicians register by district and log in to manage incoming support tickets.",
+    "caption": "Technician registration"
+  },
+  {
+    "image": "../assets/demo/04_dashboard.png",
+    "voice": "The dashboard tracks every message — new, processed, and resolved — with live filtering.",
+    "caption": "Ticket dashboard & queue"
+  },
+  {
+    "image": "../assets/screenshots/15_simulator.png",
+    "voice": "Test SMS messages through the built-in simulator — category, sender, and message in one click.",
+    "caption": "SMS simulator"
+  },
+  {
+    "image": "../assets/demo/08_whatsapp.png",
+    "voice": "WhatsApp integration via Twilio sandbox receives and processes messages in real time.",
+    "caption": "WhatsApp live integration"
+  },
+  {
+    "image": "../assets/demo/09_whatsapp_email.png",
+    "voice": "Every inbound WhatsApp message triggers an instant email alert with full ticket details.",
+    "caption": "WhatsApp email alerts"
+  },
+  {
+    "image": "../assets/demo/10_ticket_email.png",
+    "voice": "High-priority tickets are categorised — ICT, Network, or General — and assigned automatically.",
+    "caption": "Smart ticket categorisation"
+  },
+  {
+    "image": "../assets/demo/14_workflow_success.png",
+    "voice": "Power Automate workflows process each ticket end to end — from email trigger to resolution.",
+    "caption": "Power Automate automation"
+  },
+  {
+    "image": "../assets/demo/11_ticket_assigned.png",
+    "voice": "Technicians receive ticket assignment emails with priority, client, and status details.",
+    "caption": "Technician ticket assignment"
+  },
+  {
+    "image": "../assets/demo/05_reports.png",
+    "voice": "Reports and analytics show message volume, resolution rates, and technician workload.",
+    "caption": "Reports & KPI dashboard"
+  },
+  {
+    "image": "../assets/demo/07_reports_detail.png",
+    "voice": "Chart.js visualisations break down channels, categories, top senders, and recent activity.",
+    "caption": "Analytics & live activity"
+  },
+  {
+    "image": "__endcard__",
+    "voice": "Explore the full source code on GitHub — SMS Management System by Elandre Booth. Link in description.",
+    "caption": "github.com/Elandre840/sms-shortcode-mvp"
+  }
+]
