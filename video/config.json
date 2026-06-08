@@ -1,0 +1,18 @@
+{
+  "projectName": "SMS Management System",
+  "outputPrefix": "sms_demo",
+  "voice": "en-GB-SoniaNeural",
+  "targetSeconds": 60,
+  "endCard": {
+    "title": "SMS Management System",
+    "subtitle": "PHP · MySQL · SMS · WhatsApp · Power Automate",
+    "link": "github.com/Elandre840/sms-shortcode-mvp",
+    "gradientStart": "#1e3a5f",
+    "gradientEnd": "#2563eb",
+    "accent": "#93c5fd"
+  },
+  "theme": {
+    "background": { "r": 15, "g": 23, "b": 42 },
+    "captionBar": "#0f172a"
+  }
+}

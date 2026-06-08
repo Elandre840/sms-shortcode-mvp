@@ -27,3 +27,7 @@ vendor/
 # IDE
 .idea/
 *.iml
+
+# Demo video build artifacts
+video/node_modules/
+video/output/tmp/

@@ -1,0 +1,13 @@
+{
+  "name": "sms-demo-video",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "msedge-tts": "^2.0.2",
+    "sharp": "^0.33.5"
+  }
+}
