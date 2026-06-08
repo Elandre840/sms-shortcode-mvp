@@ -143,17 +143,21 @@ async function renderScene(scene, index, duration, w, h, isVertical) {
   const audioFile = path.join(TMP, `voice_${index}.mp3`);
   const sceneFile = path.join(TMP, `scene_${index}_${w}.mp4`);
   const srcImage = path.resolve(__dirname, scene.image);
+  const audioDur = await probeDuration(audioFile);
+  // Never cut voice — scene must run at least through full narration + brief pause
+  const sceneDur = Math.max(duration, audioDur + 0.4);
+
   await prepareFrame(scene.image === '__endcard__' ? '__endcard__' : srcImage, scene.caption, frameFile, w, h, isVertical);
   const fps = 30;
-  const frames = Math.max(1, Math.ceil(duration * fps));
+  const frames = Math.max(1, Math.ceil(sceneDur * fps));
   const zoomEnd = 1.06;
   await runFfmpeg([
     '-loop', '1', '-i', frameFile, '-i', audioFile,
     '-vf', `zoompan=z='1+(${zoomEnd}-1)*on/${frames}':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${frames}:s=${w}x${h}:fps=${fps},format=yuv420p`,
     '-c:v', 'libx264', '-preset', 'fast', '-crf', '22', '-c:a', 'aac', '-b:a', '192k',
-    '-t', String(duration), '-y', sceneFile,
+    '-t', String(sceneDur), '-y', sceneFile,
   ]);
-  return sceneFile;
+  return { file: sceneFile, duration: sceneDur };
 }
 
 async function downloadMusic(dest, duration) {
@@ -181,7 +185,7 @@ async function assembleVideo(sceneFiles, musicFile, outFile, totalDuration) {
     `[1:a]volume=0.12,afade=t=in:st=0:d=2,afade=t=out:st=${Math.max(0, totalDuration - 4)}:d=4[music];` +
     `[0:a][music]amix=inputs=2:duration=first:dropout_transition=2[aout]`,
     '-map', '0:v', '-map', '[aout]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
-    '-t', String(totalDuration), '-y', outFile,
+    '-y', outFile,
   ]);
 }
 
@@ -189,33 +193,33 @@ async function buildFormat(w, h, isVertical, label) {
   console.log(`\n=== Building ${label} (${w}x${h}) ===`);
   const durations = await Promise.all(scenes.map((_, i) => probeDuration(path.join(TMP, `voice_${i}.mp3`))));
   const rawTotal = durations.reduce((a, b) => a + b, 0);
-  const pad = 0.35;
-  let scaled = durations.map((d) => d + pad);
+  const tailPad = 0.4;
+  let scaled = durations.map((d) => d + tailPad);
   let total = scaled.reduce((a, b) => a + b, 0);
-  if (total > TARGET_TOTAL) {
-    const factor = TARGET_TOTAL / total;
-    scaled = scaled.map((d) => d * factor);
-    total = TARGET_TOTAL;
-  } else if (total < TARGET_TOTAL - 1) {
+
+  if (total < TARGET_TOTAL - 1) {
     const extra = (TARGET_TOTAL - total) / scenes.length;
     scaled = scaled.map((d) => d + extra);
-    total = TARGET_TOTAL;
+    total = scaled.reduce((a, b) => a + b, 0);
   }
-  console.log(`  Voice raw: ${rawTotal.toFixed(1)}s → video target: ${total.toFixed(1)}s`);
-  const sceneFiles = [];
+
+  console.log(`  Voice raw: ${rawTotal.toFixed(1)}s → video length: ${total.toFixed(1)}s (full narration preserved)`);
+  const sceneResults = [];
   for (let i = 0; i < scenes.length; i++) {
-    console.log(`  Rendering scene ${i + 1}/${scenes.length} (${scaled[i].toFixed(1)}s)`);
-    sceneFiles.push(await renderScene(scenes[i], i, scaled[i], w, h, isVertical));
+    console.log(`  Rendering scene ${i + 1}/${scenes.length} (min ${scaled[i].toFixed(1)}s)`);
+    sceneResults.push(await renderScene(scenes[i], i, scaled[i], w, h, isVertical));
   }
-  const musicFile = path.join(TMP, 'music.mp3');
-  if (!await fs.stat(musicFile).catch(() => false)) {
-    console.log('  Downloading royalty-free background music...');
-    await downloadMusic(musicFile, total);
-  }
+  const sceneFiles = sceneResults.map((r) => r.file);
+  total = sceneResults.reduce((sum, r) => sum + r.duration, 0);
+
+  const musicFile = path.join(TMP, `music_${label}.mp3`);
+  console.log('  Downloading royalty-free background music...');
+  await downloadMusic(musicFile, total);
+
   const prefix = config.outputPrefix || 'demo';
   const outFile = path.join(OUT, `${prefix}_${label}.mp4`);
   await assembleVideo(sceneFiles, musicFile, outFile, total);
-  console.log(`  ✓ ${outFile}`);
+  console.log(`  ✓ ${outFile} (${total.toFixed(1)}s)`);
   return outFile;
 }
 
@@ -226,12 +230,23 @@ await fs.mkdir(OUT, { recursive: true });
 
 for (let i = 0; i < scenes.length; i++) {
   const audioFile = path.join(TMP, `voice_${i}.mp3`);
-  console.log(`TTS ${i + 1}/${scenes.length}: ${scenes[i].caption}`);
-  await generateVoice(scenes[i].voice, audioFile);
+  if (await fs.stat(audioFile).catch(() => false)) {
+    console.log(`TTS ${i + 1}/${scenes.length}: cached — ${scenes[i].caption}`);
+  } else {
+    console.log(`TTS ${i + 1}/${scenes.length}: ${scenes[i].caption}`);
+    await generateVoice(scenes[i].voice, audioFile);
+  }
 }
 
-const landscape = await buildFormat(1920, 1080, false, '16x9');
-const vertical = await buildFormat(1080, 1920, true, '9x16');
+const formatArg = process.argv.find((a) => a.startsWith('--format='))?.split('=')[1];
+const outputs = [];
+
+if (!formatArg || formatArg === '16x9') {
+  outputs.push(await buildFormat(1920, 1080, false, '16x9'));
+}
+if (!formatArg || formatArg === '9x16') {
+  outputs.push(await buildFormat(1080, 1920, true, '9x16'));
+}
+
 console.log('\nDone!');
-console.log('  Landscape:', landscape);
-console.log('  Vertical:', vertical);
+outputs.forEach((f) => console.log(' ', f));
